@@ -3,12 +3,19 @@ import subprocess
 from tqdm import tqdm
 import os
 import time
+import pyfiglet
+from termcolor import colored
 
 # --------------------------------------------------------------------------------
 #                                      FUNÇÕES
 # --------------------------------------------------------------------------------
 
 def inicio():
+    texto = "\n PORT SCANNER"
+    titulo = pyfiglet.figlet_format(texto, font="slant")
+
+    colored_ascii_banner = colored(titulo, 'green')
+    print(colored_ascii_banner)
     print("\033[1;32m-\033[00m"*50)
     print(" "*12 + "\033[1;32mBEM VINDO AO PORT SCANNER\033[00m" + " "*12)
     print("\033[1;32m-\033[00m"*50 + "\n")
@@ -17,7 +24,7 @@ def inicio():
     print("Carregando mapa de rede...\n")
     time.sleep(1)
 
-    get_ip()
+    #get_ip()
 
     ip = input("Digite o IP desejado: \n")
 
@@ -114,7 +121,7 @@ def ports_map(ports, ip):
     }
     
     open_ports = False
-    for port in ports:
+    for port in tqdm(ports, leave=False):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(0.1)
@@ -123,17 +130,20 @@ def ports_map(ports, ip):
                 service_name = socket.getservbyport(port)
                 well_known_service = well_known_ports.get(port)
                 if port in well_known_ports.keys():
-                    print(f"Porta \033[35m{port}\033[00m (\033[33m{service_name}\033[00m) \033[32mSERVIÇO QUE DEVERIA RODAR: {well_known_service}\033[00m - {ip}")
+                    tqdm.write(f"Porta \033[35m{port}\033[00m (\033[33m{service_name}\033[00m) \033[32mSERVIÇO QUE DEVERIA RODAR: {well_known_service}\033[00m - {ip}")
                 else:
-                    print(f"Porta \033[35m{port}\033[00m (\033[33m{service_name}\033[00m) \033[031mSERVIÇO DESCONHECIDO\033[00m - {ip}")
+                    tqdm.write(f"Porta \033[35m{port}\033[00m (\033[33m{service_name}\033[00m) \033[031mSERVIÇO DESCONHECIDO\033[00m - {ip}")
                 open_ports = True
             s.close()
 
-        except socket.error as err:
-            print(f"\033[31mErro ao conectar ao host {ip} e porta {port}: {err}\033[00m")
+        except:
+            continue
+
+    print("\033[1;32mMapeamento completo!033[00m \n")
 
     if not open_ports:
         print("\033[31mNenhuma porta aberta encontrada\033[00m")
+
 
 if __name__ == "__main__":
     inicio()
